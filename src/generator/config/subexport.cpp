@@ -309,6 +309,22 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 if(!scv.is_undef())
                     singleproxy["plugin-opts"]["skip-cert-verify"] = scv.get();
                 break;
+            case "shadow-tls"_hash:
+                singleproxy["plugin"] = "shadow-tls";
+                singleproxy["plugin-opts"]["password"] = getUrlArg(pluginopts, "password");
+                singleproxy["plugin-opts"]["host"] = getUrlArg(pluginopts, "host");
+                {
+                    std::string version = getUrlArg(pluginopts, "version");
+                    if(!version.empty())
+                        singleproxy["plugin-opts"]["version"] = to_int(version, 3);
+                }
+                break;
+            }
+            // 处理udp-port参数
+            {
+                std::string udp_port = getUrlArg(pluginopts, "udp-port");
+                if(!udp_port.empty())
+                    singleproxy["udp-port"] = to_int(udp_port);
             }
             break;
         case ProxyType::VMess:

@@ -1739,7 +1739,7 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                     method = itemVal;
                     break;
                 case "password"_hash:
-                    password = itemVal;
+                    password = trimQuote(itemVal);
                     break;
                 case "obfs"_hash:
                     plugin = "simple-obfs";
@@ -1754,14 +1754,39 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                 case "tfo"_hash:
                     tfo = itemVal;
                     break;
+                case "shadow-tls-password"_hash:
+                    plugin = "shadow-tls";
+                    pluginopts_mode = itemVal;
+                    break;
+                case "shadow-tls-sni"_hash:
+                    if(plugin.empty()) plugin = "shadow-tls";
+                    pluginopts_host = itemVal;
+                    break;
+                case "shadow-tls-version"_hash:
+                    if(plugin.empty()) plugin = "shadow-tls";
+                    pluginopts += pluginopts.empty() ? "" : ";";
+                    pluginopts += "version=" + itemVal;
+                    break;
+                case "udp-port"_hash:
+                    pluginopts += pluginopts.empty() ? "" : ";";
+                    pluginopts += "udp-port=" + itemVal;
+                    break;
                 default:
                     continue;
                 }
             }
             if(!plugin.empty())
             {
-                pluginopts = "obfs=" + pluginopts_mode;
-                pluginopts += pluginopts_host.empty() ? "" : ";obfs-host=" + pluginopts_host;
+                if(plugin == "shadow-tls")
+                {
+                    pluginopts = "password=" + pluginopts_mode;
+                    pluginopts += pluginopts_host.empty() ? "" : ";host=" + pluginopts_host;
+                }
+                else
+                {
+                    pluginopts = "obfs=" + pluginopts_mode;
+                    pluginopts += pluginopts_host.empty() ? "" : ";obfs-host=" + pluginopts_host;
+                }
             }
 
             ssConstruct(node, SS_DEFAULT_GROUP, remarks, server, port, password, method, plugin, pluginopts, udp, tfo, scv);
