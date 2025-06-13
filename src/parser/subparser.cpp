@@ -1739,7 +1739,7 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                     method = itemVal;
                     break;
                 case "password"_hash:
-                    password = trimQuote(itemVal);
+                    password = itemVal;
                     break;
                 case "obfs"_hash:
                     plugin = "simple-obfs";
