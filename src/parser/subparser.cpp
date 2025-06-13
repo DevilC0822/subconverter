@@ -1728,7 +1728,13 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
 
             for(i = 3; i < configs.size(); i++)
             {
-                vArray = split(configs[i], "=");
+                // 以第一个等号为分隔符, 分割为两部分 分别是key和value
+                auto eq_pos = configs[i].find('=');
+                if(eq_pos == std::string::npos)
+                    continue;
+                vArray.clear();
+                vArray.push_back(configs[i].substr(0, eq_pos));
+                vArray.push_back(configs[i].substr(eq_pos + 1));
                 if(vArray.size() < 2)
                     continue;
                 itemName = trim(vArray[0]);
@@ -1739,13 +1745,8 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                     method = itemVal;
                     break;
                 case "password"_hash:
-                    // 对于password字段，需要重新组合被split错误分割的部分
-                    password = vArray[1];
-                    for(size_t j = 2; j < vArray.size(); j++) {
-                        password += "=" + vArray[j];
-                    }
                     // 去除前后的引号（如果有的话）
-                    password = trimQuote(password);
+                    password = trimQuote(vArray[1]);
                     break;
                 case "obfs"_hash:
                     plugin = "simple-obfs";
@@ -1762,7 +1763,8 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                     break;
                 case "shadow-tls-password"_hash:
                     plugin = "shadow-tls";
-                    pluginopts_mode = itemVal;
+                    // 去除前后的引号（如果有的话）
+                    pluginopts_mode = trimQuote(itemVal);
                     break;
                 case "shadow-tls-sni"_hash:
                     if(plugin.empty()) plugin = "shadow-tls";
