@@ -1739,7 +1739,8 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                     method = itemVal;
                     break;
                 case "password"_hash:
-                    password = itemVal;
+                    // 对于password字段，保留原始值，不使用trim处理的itemVal
+                    password = vArray[1];
                     break;
                 case "obfs"_hash:
                     plugin = "simple-obfs";
@@ -1779,8 +1780,27 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
             {
                 if(plugin == "shadow-tls")
                 {
-                    pluginopts = "password=" + pluginopts_mode;
-                    pluginopts += pluginopts_host.empty() ? "" : ";host=" + pluginopts_host;
+                    std::string base_opts = "password=" + pluginopts_mode;
+                    base_opts += pluginopts_host.empty() ? "" : ";host=" + pluginopts_host;
+                    
+                    // 如果已经有其他参数（如version等），将它们追加到基础选项后面
+                    if(!pluginopts.empty())
+                    {
+                        // 检查pluginopts中是否包含非基础选项，如果有则追加
+                        if(pluginopts.find("version=") != std::string::npos || 
+                        pluginopts.find("udp-port=") != std::string::npos)
+                        {
+                            pluginopts = base_opts + ";" + pluginopts;
+                        }
+                        else
+                        {
+                            pluginopts = base_opts;
+                        }
+                    }
+                    else
+                    {
+                        pluginopts = base_opts;
+                    }
                 }
                 else
                 {
