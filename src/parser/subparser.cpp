@@ -1739,8 +1739,13 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
                     method = itemVal;
                     break;
                 case "password"_hash:
-                    // 对于password字段，保留原始值，不使用trim处理的itemVal
+                    // 对于password字段，需要重新组合被split错误分割的部分
                     password = vArray[1];
+                    for(size_t j = 2; j < vArray.size(); j++) {
+                        password += "=" + vArray[j];
+                    }
+                    // 去除前后的引号（如果有的话）
+                    password = trimQuote(password);
                     break;
                 case "obfs"_hash:
                     plugin = "simple-obfs";
